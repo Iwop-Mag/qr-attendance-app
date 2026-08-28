@@ -14,7 +14,7 @@ Lastly and mainly, to improve the efficiency of attendance taking and tracking o
 
 ## To be done
 
--[ ] Dashboard
--[ ] QR Scanner
--[ ] Offline CSV Saving
--[ ] Google Sheets API Integration
+- [ ] Dashboard
+- [ ] QR Scanner
+- [ ] Offline CSV Saving
+- [ ] Google Sheets API Integration
