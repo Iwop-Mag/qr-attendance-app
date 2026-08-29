@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, Image, Pressable, StyleSheet } from "react-native";
 
 
 export default function Index() {
@@ -16,7 +16,24 @@ export default function Index() {
         </View>
       </View>
       <View style={styles.functionsContainer}>
-
+        <Pressable onPress={() => alert("Clicked!")}>
+          <Image
+            source={require("../../assets/images/functions/table_view_55dp_000_FILL0_wght400_GRAD0_opsz48.png")}
+            style={{ width: 40, height: 40 }}
+          />
+        </Pressable>
+        <Pressable style={styles.functionsQRContainer} onPress={() => alert("Clicked!")}>
+          <Image
+            source={require("../../assets/images/functions/qr_code_scanner_55dp_000_FILL0_wght400_GRAD0_opsz48.png")}
+            style={{ width: 45, height: 45 }}
+          />
+        </Pressable>
+        <Pressable onPress={() => alert("Clicked!")}>
+          <Image
+            source={require("../../assets/images/functions/logo_dev_55dp_000_FILL0_wght400_GRAD0_opsz48.png")}
+            style={{ width: 40, height: 40 }}
+          />
+        </Pressable>
       </View>
     </View>
   );
@@ -66,8 +83,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   functionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 15,
     marginTop: 100,
-    backgroundColor: "rgba(255, 0, 0, 0.4)",
+    // backgroundColor: "rgba(255, 0, 0, 0.1)",
     height: 70,
+  },
+  functionsQRContainer: {
+    backgroundColor: "rgba(255, 255, 255, 1)",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 70,
+    width: 70,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: "rgba(0, 0, 0, 1)",
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+
+    elevation: 5,
   },
 });
