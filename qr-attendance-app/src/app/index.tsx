@@ -9,6 +9,7 @@ export default function Index() {
         <Text style={styles.header}>BSECE - 1C</Text>
       </View>
       <View style={styles.dashboardContainer}>
+        <View style={styles.dashboardItemMain}></View>
         <Text>Dashboard</Text>
       </View>
     </View>
@@ -25,13 +26,20 @@ const styles = StyleSheet.create({
   },
   subHeader: {
     fontSize: 30,
-    fontWeight: "400",
-    marginBottom: -25,
+    fontWeight: "500",
+    marginBottom: -10,
   },
   header: {
     fontSize: 50,
     fontWeight: "900",
   },
   dashboardContainer: {
+  },
+  dashboardItemMain: {
+    backgroundColor: "#000",
+    height: 200,
+    width: "100%",
+    borderRadius: 20,
+    marginBottom: 10,
   },
 });
