@@ -1,12 +1,21 @@
-import React, { useState } from "react";
-import { Text, View, Pressable, StyleSheet, Alert, Image } from "react-native";
+import React, { useState, useCallback, useRef } from "react";
+import { Text, View, Pressable, StyleSheet, Alert, Image, Switch } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 export default function QRScanner() {
+  
   const [torchOn, setTorchOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+
+  const bottomSheetRef = React.useRef<BottomSheet>(null);
+  const [toggle1, setToggle1] = useState(false);
+  const [toggle2, setToggle2] = useState(false);
+  const [toggle3, setToggle3] = useState(false);
+
+  const snapPoints = React.useMemo(() => ["25%", "50%", "75%"], []);
 
   if (!permission) {
     return <View style={styles.container}><Text>Loading camera permissions...</Text></View>;
@@ -45,12 +54,30 @@ export default function QRScanner() {
       <Pressable style={styles.flashlight} onPress={toggleTorch}>
         <Image
           source={torchOn ? require("../../assets/images/functions/flashlight_off_64dp_000_FILL0_wght200_GRAD0_opsz48.png") : require("../../assets/images/functions/flashlight_on_64dp_000_FILL0_wght200_GRAD0_opsz48.png")}
-          style={{ width: 50, height: 50, alignSelf: "center" }}
+          style={styles.flashlightIcon}
         />
       </Pressable>
       <Pressable style={styles.floatingButton} onPress={() => router.push("/history")}>
         <Text style={styles.buttonText}>View History</Text>
       </Pressable>
+
+      <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
+        <BottomSheetView style={styles.content}>
+          <Row label="Row one" value={toggle1} onChange={() => setToggle1(!toggle1)} />
+          <Row label="Row two" value={toggle2} onChange={() => setToggle2(!toggle2)} />
+          <Row label="Row three" value={toggle3} onChange={() => setToggle3(!toggle3)} />
+        </BottomSheetView>
+      </BottomSheet>
+
+    </View>
+  );
+}
+
+function Row({ label, value, onChange }: { label: string; value: boolean; onChange: () => void }) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Switch value={value} onValueChange={onChange} />
     </View>
   );
 }
@@ -88,6 +115,13 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "rgba(0, 0, 0, 1.5)",
   },
+  flashlightIcon: {
+    position: "absolute",
+    bottom: 10,
+    height: 50,
+    width: 50,
+    alignSelf: "center",
+  },
   button: {
     backgroundColor: "#1e1e1e",
     paddingVertical: 12,
@@ -104,4 +138,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: { color: "#fff", fontWeight: "600" },
+  content: { flex: 1, paddingHorizontal: 20, paddingTop: 12 },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+  },
+  label: { fontSize: 16, color: "#333" },
 });
