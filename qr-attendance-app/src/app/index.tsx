@@ -1,4 +1,5 @@
 import { Text, View, Image, Pressable, StyleSheet } from "react-native";
+import { router } from "expo-router";
 
 
 export default function Index() {
@@ -22,7 +23,7 @@ export default function Index() {
             style={{ width: 40, height: 40 }}
           />
         </Pressable>
-        <Pressable style={styles.functionsQRContainer} onPress={() => alert("Clicked!")}>
+        <Pressable style={styles.functionsQRContainer} onPress={() => router.push("/qrscanner")}>
           <Image
             source={require("../../assets/images/functions/qr_code_scanner_55dp_000_FILL0_wght400_GRAD0_opsz48.png")}
             style={{ width: 45, height: 45 }}
@@ -43,6 +44,8 @@ const styles = StyleSheet.create({
   appWrapper: {
     flex: 1,
     padding: 25,
+    
+    backgroundColor: "rgba(255, 255, 255, 1)",
   },
   headContainer: {
     marginTop: 40,
