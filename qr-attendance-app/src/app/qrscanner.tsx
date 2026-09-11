@@ -2,26 +2,30 @@ import React, { useState, useCallback, useRef } from "react";
 import { Text, View, Pressable, StyleSheet, Alert, Image, Switch } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 
 export default function QRScanner() {
   
+  // flashlight
   const [torchOn, setTorchOn] = useState(false);
+  // camera
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
+  // bottom panel stuff
   const bottomSheetRef = React.useRef<BottomSheet>(null);
   const [toggle1, setToggle1] = useState(false);
   const [toggle2, setToggle2] = useState(false);
   const [toggle3, setToggle3] = useState(false);
 
-  const snapPoints = React.useMemo(() => ["25%", "50%", "75%"], []);
+  // Animation points for the panel ito
+  const snapPoints = React.useMemo(() => ["10%", "50%" ], []); 
 
   if (!permission) {
     return <View style={styles.container}><Text>Loading camera permissions...</Text></View>;
   }
 
-  if (!permission.granted) {
+  if (!permission.granted) { //camera permission prompt
     return (
       <View style={styles.container}>
         <Text style={{ marginBottom: 12 }}>We need camera access to scan QR codes.</Text>
@@ -32,6 +36,9 @@ export default function QRScanner() {
     );
   }
 
+
+  // dito yung qr data
+  // integrate here the csv and sheets api
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scanned) return;
     setScanned(true);
@@ -40,6 +47,18 @@ export default function QRScanner() {
     ]);
   };
 
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        pressBehavior="close"
+      />
+    ),
+    []
+  );
+
+
+  //previous previous toggles lang
   const toggleTorch = () => setTorchOn((prev) => !prev);
 
   return (
@@ -57,15 +76,24 @@ export default function QRScanner() {
           style={styles.flashlightIcon}
         />
       </Pressable>
-      <Pressable style={styles.floatingButton} onPress={() => router.push("/history")}>
-        <Text style={styles.buttonText}>View History</Text>
-      </Pressable>
 
-      <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
+      <BottomSheet 
+        ref={bottomSheetRef} 
+        index={0} 
+        snapPoints={snapPoints} 
+        backgroundStyle={styles.sheetBackground}
+        handleIndicatorStyle={styles.handleIndicator}
+        handleStyle={styles.handleContainer}
+        enablePanDownToClose={false}
+        backdropComponent={renderBackdrop}
+      >
         <BottomSheetView style={styles.content}>
           <Row label="Row one" value={toggle1} onChange={() => setToggle1(!toggle1)} />
           <Row label="Row two" value={toggle2} onChange={() => setToggle2(!toggle2)} />
           <Row label="Row three" value={toggle3} onChange={() => setToggle3(!toggle3)} />
+            <Pressable style={styles.floatingButton} onPress={() => router.push("/history")}>
+              <Text style={styles.buttonText}>View History</Text>
+            </Pressable>
         </BottomSheetView>
       </BottomSheet>
 
@@ -129,21 +157,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   floatingButton: {
-    position: "absolute",
-    bottom: 40,
+    marginTop: 50,
     alignSelf: "center",
     backgroundColor: "#1e1e1e",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-  buttonText: { color: "#fff", fontWeight: "600" },
-  content: { flex: 1, paddingHorizontal: 20, paddingTop: 12 },
+  buttonText: { 
+    color: "#fff", 
+    fontWeight: "600" 
+  },
+  content: { 
+    flex: 1, 
+    paddingHorizontal: 20, 
+    paddingTop: 12, 
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 14,
   },
-  label: { fontSize: 16, color: "#333" },
+  label: { 
+    fontSize: 16, 
+    color: "#333" 
+  },
+  sheetBackground: {
+    backgroundColor: "#f0f0f0",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  handleIndicator: {
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    width: 150,  
+  },
+  handleContainer: {
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+  },
 });
