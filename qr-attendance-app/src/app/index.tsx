@@ -29,7 +29,7 @@ export default function Index() {
             style={{ width: 45, height: 45 }}
           />
         </Pressable>
-        <Pressable onPress={() => alert("Clicked!")}>
+        <Pressable onPress={() => router.push('/history')}>
           <Image
             source={require("../../assets/images/functions/logo_dev_55dp_000_FILL0_wght400_GRAD0_opsz48.png")}
             style={{ width: 40, height: 40 }}

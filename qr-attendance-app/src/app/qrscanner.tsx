@@ -1,31 +1,72 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Text, View, Pressable, StyleSheet, Alert, Image, Switch } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { router } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
+import { recordScan, startSession } from '../db/attendanceRepo';
 
 export default function QRScanner() {
-  
-  // flashlight
+  const { subjectId, sectionId } = useLocalSearchParams<{ subjectId: string; sectionId: string }>();
+
+  // ALL hooks go here, unconditionally, in the same order every render
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const [torchOn, setTorchOn] = useState(false);
-  // camera
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 
-  // bottom panel stuff
   const bottomSheetRef = React.useRef<BottomSheet>(null);
   const [toggle1, setToggle1] = useState(false);
   const [toggle2, setToggle2] = useState(false);
   const [toggle3, setToggle3] = useState(false);
 
-  // Animation points for the panel ito
-  const snapPoints = React.useMemo(() => ["10%", "50%" ], []); 
+  const snapPoints = React.useMemo(() => ["10%", "50%"], []);
 
+  useEffect(() => {
+    if (subjectId && sectionId) {
+      startSession(Number(subjectId), Number(sectionId)).then(setSessionId);
+    }
+  }, [subjectId, sectionId]);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop {...props} pressBehavior="close" />
+    ),
+    []
+  );
+
+  // handleBarcodeScanned, toggleTorch are plain functions, not hooks — fine to define anywhere,
+  // but keep them here for readability
+  const handleBarcodeScanned = async ({ data }: { data: string }) => {
+    if (scanned) return;
+    setScanned(true);
+
+    if (!sessionId) {
+      Alert.alert("Starting up", "Session isn't ready yet, try again in a moment.", [
+        { text: "OK", onPress: () => setScanned(false) },
+      ]);
+      return;
+    }
+
+    try {
+      await recordScan(sessionId, data);
+      Alert.alert("QR Scanned", data, [
+        { text: "Scan next", onPress: () => setScanned(false) },
+        { text: "View history", onPress: () => router.push({ pathname: "/history", params: { sessionId: String(sessionId) } }) },
+      ]);
+    } catch (err) {
+      Alert.alert("Error saving scan", String(err));
+      setScanned(false);
+    }
+  };
+
+  const toggleTorch = () => setTorchOn((prev) => !prev);
+
+  // NOW it's safe to branch — all hooks already ran above
   if (!permission) {
     return <View style={styles.container}><Text>Loading camera permissions...</Text></View>;
   }
 
-  if (!permission.granted) { //camera permission prompt
+  if (!permission.granted) {
     return (
       <View style={styles.container}>
         <Text style={{ marginBottom: 12 }}>We need camera access to scan QR codes.</Text>
@@ -35,31 +76,6 @@ export default function QRScanner() {
       </View>
     );
   }
-
-
-  // dito yung qr data
-  // integrate here the csv and sheets api
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
-    if (scanned) return;
-    setScanned(true);
-    Alert.alert("QR Scanned", data, [
-      { text: "OK", onPress: () => setScanned(false) },
-    ]);
-  };
-
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        pressBehavior="close"
-      />
-    ),
-    []
-  );
-
-
-  //previous previous toggles lang
-  const toggleTorch = () => setTorchOn((prev) => !prev);
 
   return (
     <View style={{ flex: 1 }}>
@@ -91,9 +107,11 @@ export default function QRScanner() {
           <Row label="Row one" value={toggle1} onChange={() => setToggle1(!toggle1)} />
           <Row label="Row two" value={toggle2} onChange={() => setToggle2(!toggle2)} />
           <Row label="Row three" value={toggle3} onChange={() => setToggle3(!toggle3)} />
-            <Pressable style={styles.floatingButton} onPress={() => router.push("/history")}>
+
+            <Pressable style={styles.floatingButton} onPress={() => router.push({ pathname: "/history", params: { sessionId } })}>
               <Text style={styles.buttonText}>View History</Text>
             </Pressable>
+
         </BottomSheetView>
       </BottomSheet>
 
